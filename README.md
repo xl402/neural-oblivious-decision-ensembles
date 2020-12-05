@@ -1,4 +1,4 @@
-# Tensorflow Implementation of Neural Oblivious Decision Ensembles
+# Keras implementation of Neural Oblivious Decision Ensembles
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/xl402/node/node)
 
 
