@@ -3,11 +3,6 @@ import tensorflow as tf
 from node.networks.layer import ObliviousDecisionTree as ODT
 
 
-@tf.function
-def identity(x: tf.Tensor):
-    return x
-
-
 class NODE(tf.keras.Model):
     def __init__(self,
                  units=1,
@@ -15,8 +10,7 @@ class NODE(tf.keras.Model):
                  link=tf.identity,
                  n_trees=3,
                  depth=4,
-                 threshold_init_beta=1.,
-                 feature_column=None):
+                 threshold_init_beta=1):
 
         super(NODE, self).__init__()
         self.units = units
@@ -25,12 +19,7 @@ class NODE(tf.keras.Model):
         self.depth = depth
         self.units = units
         self.threshold_init_beta = threshold_init_beta
-        self.feature_column = feature_column
 
-        if feature_column is None:
-            self.feature = tf.keras.layers.Lambda(identity)
-        else:
-            self.feature = feature_column
         self.bn = tf.keras.layers.BatchNormalization()
         self.ensemble = [ODT(n_trees=n_trees,
                              depth=depth,
@@ -39,10 +28,13 @@ class NODE(tf.keras.Model):
                          for _ in range(n_layers)]
         self.link = link
 
+    @tf.function
+    def _identity(self, x):
+        return x
+
     def call(self, inputs, training=None):
-        X = self.feature(inputs)
-        X = self.bn(X, training=training)
+        x = self.bn(inputs, training=training)
         for tree in self.ensemble:
-            H = tree(X)
-            X = tf.concat([X, H], axis=1)
-        return self.link(H)
+            h = tree(x)
+            x = tf.concat([x, h], axis=1)
+        return self.link(h)
