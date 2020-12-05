@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from node.networks.layer import ODST
+from node.networks.layer import ObliviousDecisionTree as ODT
 
 
 @tf.function
@@ -32,10 +32,10 @@ class NODE(tf.keras.Model):
         else:
             self.feature = feature_column
         self.bn = tf.keras.layers.BatchNormalization()
-        self.ensemble = [ODST(n_trees=n_trees,
-                              depth=depth,
-                              units=units,
-                              threshold_init_beta=threshold_init_beta)
+        self.ensemble = [ODT(n_trees=n_trees,
+                             depth=depth,
+                             units=units,
+                             threshold_init_beta=threshold_init_beta)
                          for _ in range(n_layers)]
         self.link = link
 
