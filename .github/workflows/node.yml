@@ -1,4 +1,4 @@
-name: performer
+name: node
 
 on: [push, pull_request]
 

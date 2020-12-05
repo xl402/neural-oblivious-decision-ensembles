@@ -56,13 +56,13 @@ class ODST(tf.keras.layers.Layer):
         # intialize log_temperatures
         self.log_temperatures.assign(tfp.stats.percentile(tf.math.abs(feature_values - self.feature_thresholds), 50, axis=0))
 
-        def feature_values(self, inputs: tf.Tensor, training: bool = None):
-            feature_selectors = tfa.activations.sparsemax(self.feature_selection_logits)
-            # ^--[in_features, n_trees, depth]
+    def feature_values(self, inputs: tf.Tensor, training: bool = None):
+        feature_selectors = tfa.activations.sparsemax(self.feature_selection_logits)
+        # ^--[in_features, n_trees, depth]
 
-            feature_values = tf.einsum('bi,ind->bnd', inputs, feature_selectors)
-            # ^--[batch_size, n_trees, depth]
-            return feature_values
+        feature_values = tf.einsum('bi,ind->bnd', inputs, feature_selectors)
+        # ^--[batch_size, n_trees, depth]
+        return feature_values
 
     def call(self, inputs: tf.Tensor, training: bool = None):
         if not self.initialized:
