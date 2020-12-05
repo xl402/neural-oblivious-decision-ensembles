@@ -1,7 +1,6 @@
-from typing import Union, Optional
 import tensorflow as tf
 import tensorflow_addons as tfa
-import tensorflow_probability as tfp
+from tensorflow_probability import distributions, stats
 import numpy as np
 
 
@@ -24,68 +23,79 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
         self.threshold_init_beta = threshold_init_beta
 
     def build(self, input_shape):
-        feature_selection_logits_init = tf.zeros_initializer()
-        logits_init_shape = (input_shape[-1], self.n_trees, self.depth)
-        logits_init_value = feature_selection_logits_init(shape=logits_init_shape,
-                                                          dtype='float32')
-        self.feature_selection_logits = tf.Variable(logits_init_value, trainable=True)
+        feature_dim = input_shape[-1]
+        self._build_feature_selection_logits(feature_dim)
+        self._build_feature_thresholds(feature_dim)
+        self._build_log_temperature(feature_dim)
+        self._build_onehot_binary_encoder()
+        self._build_output_response()
 
-        feature_thresholds_init = tf.zeros_initializer()
-        thresholds_init_shape = (self.n_trees, self.depth)
-        thresholds_init_value = feature_thresholds_init(shape=thresholds_init_shape,
-                                                        dtype='float32')
-        self.feature_thresholds = tf.Variable(thresholds_init_value, trainable=True)
+    def _build_feature_selection_logits(self, dim):
+        initializer = tf.zeros_initializer()
+        init_shape = (dim, self.n_trees, self.depth)
+        init_value = initializer(shape=init_shape, dtype='float32')
+        self.feature_selection_logits = tf.Variable(init_value, trainable=True)
 
-        log_temperatures_init = tf.ones_initializer()
-        log_temperatures_init_value = log_temperatures_init(shape=thresholds_init_shape,
-                                                            dtype='float32')
-        self.log_temperatures = tf.Variable(initial_value=log_temperatures_init_value,
-                                            trainable=True)
+    def _build_feature_thresholds(self, dim):
+        initializer = tf.zeros_initializer()
+        init_shape = (self.n_trees, self.depth)
+        init_value = initializer(shape=init_shape, dtype='float32')
+        self.feature_thresholds = tf.Variable(init_value, trainable=True)
 
+    def _build_log_temperature(self, dim):
+        initializer = tf.ones_initializer()
+        init_shape = (self.n_trees, self.depth)
+        init_value = initializer(shape=init_shape, dtype='float32')
+        self.log_temperatures = tf.Variable(initial_value=init_value, trainable=True)
+
+    def _build_onehot_binary_encoder(self):
         indices = tf.keras.backend.arange(0, 2 ** self.depth, 1)
         offsets = 2 ** tf.keras.backend.arange(0, self.depth, 1)
         bin_codes = (tf.reshape(indices, (1, -1)) // tf.reshape(offsets, (-1, 1)) % 2)
         bin_codes_1hot = tf.stack([bin_codes, 1 - bin_codes], axis=-1)
         bin_codes_1hot = tf.cast(bin_codes_1hot, 'float32')
-        self.bin_codes_1hot = tf.Variable(initial_value=bin_codes_1hot,
-                                          trainable=False)
+        self.bin_codes_1hot = tf.Variable(initial_value=bin_codes_1hot, trainable=False)
 
-        response_init = tf.ones_initializer()
-        response_shape = (self.n_trees, self.units, 2**self.depth)
-        response_init_value = response_init(response_shape, dtype='float32')
-        self.response = tf.Variable(initial_value=response_init_value,
-                                    trainable=True)
+    def _build_output_response(self):
+        initializer = tf.ones_initializer()
+        init_shape = (self.n_trees, self.units, 2**self.depth)
+        init_value = initializer(init_shape, dtype='float32')
+        self.response = tf.Variable(initial_value=init_value, trainable=True)
 
-    def initialize(self, inputs):
-        feature_values = self.feature_values(inputs)
+    def _data_aware_initialization(self, inputs):
+        feature_values = self._get_feature_values(inputs)
+        self._initialize_feature_thresholds(feature_values)
+        self._initialize_log_temperatures(feature_values)
 
-        # intialize feature_thresholds
-        percentiles_q = (100 * tfp.distributions.Beta(self.threshold_init_beta,
-                                                      self.threshold_init_beta)
-                         .sample([self.n_trees * self.depth]))
-        flattened_feature_values = tf.map_fn(tf.keras.backend.flatten, feature_values)
-        init_feature_thresholds = tf.linalg.diag_part(tfp.stats.percentile(flattened_feature_values, percentiles_q, axis=0))
-
-        self.feature_thresholds.assign(tf.reshape(init_feature_thresholds, self.feature_thresholds.shape))
-
-        # intialize log_temperatures
-        self.log_temperatures.assign(tfp.stats.percentile(tf.math.abs(feature_values - self.feature_thresholds), 50, axis=0))
-
-    def feature_values(self, inputs, training=None):
+    def _get_feature_values(self, inputs, training=None):
         feature_selectors = tfa.activations.sparsemax(self.feature_selection_logits)
-        # ^--[in_features, n_trees, depth]
-
         feature_values = tf.einsum('bi,ind->bnd', inputs, feature_selectors)
-        # ^--[batch_size, n_trees, depth]
         return feature_values
+
+    def _initialize_feature_thresholds(self, inputs):
+        sampler = distributions.Beta(self.threshold_init_beta, self.threshold_init_beta)
+        percentiles_q = (100 * sampler.sample([self.n_trees * self.depth]))
+
+        flattened_feature_values = tf.map_fn(tf.keras.backend.flatten, inputs)
+        percentile = stats.percentile(flattened_feature_values, percentiles_q, axis=0)
+        init_feature_thresholds = tf.linalg.diag_part(percentile)
+
+        feature_thresholds = tf.reshape(init_feature_thresholds,
+                                        self.feature_thresholds.shape)
+        self.feature_thresholds.assign(feature_thresholds)
+
+    def _initialize_log_temperatures(self, inputs):
+        input_threshold_diff = tf.math.abs(inputs - self.feature_thresholds)
+        self.log_temperatures.assign(stats.percentile(input_threshold_diff, 50, axis=0))
 
     def call(self, inputs, training=None):
         if not self.initialized:
-            self.initialize(inputs)
+            self._data_aware_initialization(inputs)
             self.initialized = True
 
-        feature_values = self.feature_values(inputs)
-        threshold_logits = (feature_values - self.feature_thresholds) * tf.math.exp(-self.log_temperatures)
+        feature_values = self._get_feature_values(inputs)
+        threshold_logits = (feature_values - self.feature_thresholds)
+        threshold_logits = threshold_logits * tf.math.exp(-self.log_temperatures)
 
         threshold_logits = tf.stack([-threshold_logits, threshold_logits], axis=-1)
         # ^--[batch_size, n_trees, depth, 2]
@@ -102,3 +112,9 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
         response = tf.einsum('bnd,ncd->bnc', response_weights, self.response)
         # ^-- [batch_size, n_trees, units]
         return tf.reduce_sum(response, axis=1)
+
+
+if __name__=='__main__':
+    layer = ObliviousDecisionTree(n_trees=100, depth=4, units=2)
+    x = tf.random.uniform(shape=(1, 10))
+    y = layer(x)
