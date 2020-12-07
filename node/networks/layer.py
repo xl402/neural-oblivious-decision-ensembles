@@ -27,7 +27,7 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
         self._build_feature_selection_logits(feature_dim)
         self._build_feature_thresholds()
         self._build_log_temperature()
-        self._built_1hot_to_binary_index_lut()
+        self._build_onehot_to_binary_lookup_table()
         self._build_output_response()
 
     def _build_feature_selection_logits(self, dim):
@@ -48,13 +48,13 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
         init_value = initializer(shape=init_shape, dtype='float32')
         self.log_temperatures = tf.Variable(initial_value=init_value, trainable=True)
 
-    def _built_1hot_to_binary_index_lut(self):
+    def _build_onehot_to_binary_lookup_table(self):
         indices = tf.keras.backend.arange(0, 2 ** self.depth, 1)
         offsets = 2 ** tf.keras.backend.arange(0, self.depth, 1)
         bin_codes = (tf.reshape(indices, (1, -1)) // tf.reshape(offsets, (-1, 1)) % 2)
-        binary_lut = tf.stack([bin_codes, 1 - bin_codes], axis=-1)
-        binary_lut = tf.cast(binary_lut, 'float32')
-        self.binary_lut = tf.Variable(initial_value=binary_lut, trainable=False)
+        bin_codes = tf.stack([bin_codes, 1 - bin_codes], axis=-1)
+        bin_codes = tf.cast(bin_codes, 'float32')
+        self.binary_lut = tf.Variable(initial_value=bin_codes, trainable=False)
 
     def _build_output_response(self):
         initializer = tf.ones_initializer()
@@ -94,12 +94,15 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
             self.initialized = True
 
         feature_values = self._get_feature_values(inputs)
+
         threshold_logits = (feature_values - self.feature_thresholds)
         threshold_logits = threshold_logits * tf.math.exp(-self.log_temperatures)
         threshold_logits = tf.stack([-threshold_logits, threshold_logits], axis=-1)
 
         feature_gates = sparsemoid(threshold_logits)
 
+        # b: batch, n: n_trees, d: depth, s: 2 (binary channels)
+        # c: 2**depth, u: units (response units)
         response_gates = tf.einsum('bnds,dcs->bndc', feature_gates, self.binary_lut)
         response_gates = tf.math.reduce_prod(response_gates, axis=-2)
         response = tf.einsum('bnc,nuc->bnu', response_gates, self.response)
