@@ -11,7 +11,6 @@ def sparsemoid(inputs):
 
 def get_binary_lookup_table(depth):
     # output: binary tensor [depth, 2**depth, 2]
-    # where last dimension adds to one
     indices = tf.keras.backend.arange(0, 2**depth, 1)
     offsets = 2 ** tf.keras.backend.arange(0, depth, 1)
     bin_codes = (tf.reshape(indices, (1, -1)) // tf.reshape(offsets, (-1, 1)) % 2)
@@ -25,32 +24,28 @@ def get_feature_selection_logits(n_trees, depth, dim):
     initializer = tf.zeros_initializer()
     init_shape = (dim, n_trees, depth)
     init_value = initializer(shape=init_shape, dtype='float32')
-    feature_selection_logits = tf.Variable(init_value, trainable=True)
-    return feature_selection_logits
+    return tf.Variable(init_value, trainable=True)
 
 
 def get_feature_thresholds(n_trees, depth):
     initializer = tf.zeros_initializer()
     init_shape = (n_trees, depth)
     init_value = initializer(shape=init_shape, dtype='float32')
-    feature_thresholds = tf.Variable(init_value, trainable=True)
-    return feature_thresholds
+    return tf.Variable(init_value, trainable=True)
 
 
 def get_log_temperature(n_trees, depth):
     initializer = tf.ones_initializer()
     init_shape = (n_trees, depth)
     init_value = initializer(shape=init_shape, dtype='float32')
-    log_temperatures = tf.Variable(initial_value=init_value, trainable=True)
-    return log_temperatures
+    return tf.Variable(initial_value=init_value, trainable=True)
 
 
 def get_output_response(n_trees, depth, units):
     initializer = tf.ones_initializer()
     init_shape = (n_trees, units, 2**depth)
     init_value = initializer(init_shape, dtype='float32')
-    response = tf.Variable(initial_value=init_value, trainable=True)
-    return response
+    return tf.Variable(initial_value=init_value, trainable=True)
 
 
 class ObliviousDecisionTree(tf.keras.layers.Layer):
