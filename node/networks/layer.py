@@ -10,6 +10,8 @@ def sparsemoid(inputs):
 
 
 def get_binary_lookup_table(depth):
+    # output: binary tensor [depth, 2**depth, 2]
+    # where last dimension adds to one
     indices = tf.keras.backend.arange(0, 2**depth, 1)
     offsets = 2 ** tf.keras.backend.arange(0, depth, 1)
     bin_codes = (tf.reshape(indices, (1, -1)) // tf.reshape(offsets, (-1, 1)) % 2)
