@@ -5,7 +5,7 @@ import numpy as np
 
 
 @tf.function
-def sparsemoid(inputs: tf.Tensor):
+def sparsemoid(inputs):
     return tf.clip_by_value(0.5 * inputs + 0.5, 0., 1.)
 
 
@@ -25,9 +25,9 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
     def build(self, input_shape):
         feature_dim = input_shape[-1]
         self._build_feature_selection_logits(feature_dim)
-        self._build_feature_thresholds(feature_dim)
-        self._build_log_temperature(feature_dim)
-        self._build_onehot_binary_encoder()
+        self._build_feature_thresholds()
+        self._build_log_temperature()
+        self._build_onehot_to_binary_lookup_table()
         self._build_output_response()
 
     def _build_feature_selection_logits(self, dim):
@@ -36,25 +36,25 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
         init_value = initializer(shape=init_shape, dtype='float32')
         self.feature_selection_logits = tf.Variable(init_value, trainable=True)
 
-    def _build_feature_thresholds(self, dim):
+    def _build_feature_thresholds(self):
         initializer = tf.zeros_initializer()
         init_shape = (self.n_trees, self.depth)
         init_value = initializer(shape=init_shape, dtype='float32')
         self.feature_thresholds = tf.Variable(init_value, trainable=True)
 
-    def _build_log_temperature(self, dim):
+    def _build_log_temperature(self):
         initializer = tf.ones_initializer()
         init_shape = (self.n_trees, self.depth)
         init_value = initializer(shape=init_shape, dtype='float32')
         self.log_temperatures = tf.Variable(initial_value=init_value, trainable=True)
 
-    def _build_onehot_binary_encoder(self):
+    def _build_onehot_to_binary_lookup_table(self):
         indices = tf.keras.backend.arange(0, 2 ** self.depth, 1)
         offsets = 2 ** tf.keras.backend.arange(0, self.depth, 1)
         bin_codes = (tf.reshape(indices, (1, -1)) // tf.reshape(offsets, (-1, 1)) % 2)
-        bin_codes_1hot = tf.stack([bin_codes, 1 - bin_codes], axis=-1)
-        bin_codes_1hot = tf.cast(bin_codes_1hot, 'float32')
-        self.bin_codes_1hot = tf.Variable(initial_value=bin_codes_1hot, trainable=False)
+        bin_codes = tf.stack([bin_codes, 1 - bin_codes], axis=-1)
+        bin_codes = tf.cast(bin_codes, 'float32')
+        self.binary_lut = tf.Variable(initial_value=bin_codes, trainable=False)
 
     def _build_output_response(self):
         initializer = tf.ones_initializer()
@@ -94,27 +94,23 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
             self.initialized = True
 
         feature_values = self._get_feature_values(inputs)
+
         threshold_logits = (feature_values - self.feature_thresholds)
         threshold_logits = threshold_logits * tf.math.exp(-self.log_temperatures)
-
         threshold_logits = tf.stack([-threshold_logits, threshold_logits], axis=-1)
-        # ^--[batch_size, n_trees, depth, 2]
 
-        bins = sparsemoid(threshold_logits)
-        # ^--[batch_size, n_trees, depth, 2], approximately binary
+        feature_gates = sparsemoid(threshold_logits)
 
-        bin_matches = tf.einsum('btds,dcs->btdc', bins, self.bin_codes_1hot)
-        # ^--[batch_size, n_trees, depth, 2 ** depth]
-
-        response_weights = tf.math.reduce_prod(bin_matches, axis=-2)
-        # ^-- [batch_size, n_trees, 2 ** depth]
-
-        response = tf.einsum('bnd,ncd->bnc', response_weights, self.response)
-        # ^-- [batch_size, n_trees, units]
-        return tf.reduce_sum(response, axis=1)
+        # b: batch, n: number of trees, d: depth of trees, s: 2 (binary channels)
+        # c: 2**depth, u: units (response units)
+        response_gates = tf.einsum('bnds,dcs->bndc', feature_gates, self.binary_lut)
+        response_gates = tf.math.reduce_prod(response_gates, axis=-2)
+        response = tf.einsum('bnc,nuc->bnu', response_gates, self.response)
+        output = tf.reduce_sum(response, axis=1)
+        return output
 
 
 if __name__=='__main__':
-    layer = ObliviousDecisionTree(n_trees=100, depth=4, units=2)
+    layer = ObliviousDecisionTree(n_trees=100, depth=3, units=2)
     x = tf.random.uniform(shape=(1, 10))
     y = layer(x)
