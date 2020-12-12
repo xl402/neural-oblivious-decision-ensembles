@@ -65,7 +65,9 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
     def _data_aware_initialization(self, inputs):
         feature_values = self._get_feature_values(inputs)
         self._initialize_feature_thresholds(feature_values)
-        self._initialize_log_temperatures(feature_values) def _get_feature_values(self, inputs, training=None):
+        self._initialize_log_temperatures(feature_values)
+
+    def _get_feature_values(self, inputs, training=None):
         feature_selectors = tfa.activations.sparsemax(self.feature_selection_logits)
         feature_values = tf.einsum('bi,ind->bnd', inputs, feature_selectors)
         return feature_values
