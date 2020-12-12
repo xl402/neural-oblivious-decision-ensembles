@@ -21,14 +21,21 @@ def get_binary_lookup_table(depth):
 
 
 def get_feature_selection_logits(n_trees, depth, dim):
-    initializer = tf.zeros_initializer()
+    initializer = tf.keras.initializers.random_uniform()
     init_shape = (dim, n_trees, depth)
     init_value = initializer(shape=init_shape, dtype='float32')
     return tf.Variable(init_value, trainable=True)
 
 
+def get_output_response(n_trees, depth, units):
+    initializer = tf.keras.initializers.random_uniform()
+    init_shape = (n_trees, units, 2**depth)
+    init_value = initializer(init_shape, dtype='float32')
+    return tf.Variable(initial_value=init_value, trainable=True)
+
+
 def get_feature_thresholds(n_trees, depth):
-    initializer = tf.zeros_initializer()
+    initializer = tf.ones_initializer()
     init_shape = (n_trees, depth)
     init_value = initializer(shape=init_shape, dtype='float32')
     return tf.Variable(init_value, trainable=True)
@@ -41,21 +48,13 @@ def get_log_temperatures(n_trees, depth):
     return tf.Variable(initial_value=init_value, trainable=True)
 
 
-def get_output_response(n_trees, depth, units):
-    initializer = tf.ones_initializer()
-    init_shape = (n_trees, units, 2**depth)
-    init_value = initializer(init_shape, dtype='float32')
-    return tf.Variable(initial_value=init_value, trainable=True)
-
-
 def init_feature_thresholds(features, beta, n_trees, depth):
     sampler = distributions.Beta(beta, beta)
-    percentiles_q = (100 * sampler.sample([n_trees * depth]))
+    percentiles_q = sampler.sample([n_trees * depth])
 
     flattened_feature_values = tf.map_fn(tf.keras.backend.flatten, features)
-    percentile = stats.percentile(flattened_feature_values, percentiles_q, axis=0)
-    init_value = tf.linalg.diag_part(percentile)
-    feature_thresholds = tf.reshape(init_value, (n_trees, depth))
+    percentile = stats.percentile(flattened_feature_values, 100*percentiles_q)
+    feature_thresholds = tf.reshape(percentile, (n_trees, depth))
     return feature_thresholds
 
 
@@ -104,6 +103,20 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
         feature_values = tf.einsum('bi,ind->bnd', inputs, feature_selectors)
         return feature_values
 
+    def _get_feature_gates(self, feature_values):
+        threshold_logits = (feature_values - self.feature_thresholds)
+        threshold_logits = threshold_logits * tf.math.exp(-self.log_temperatures)
+        threshold_logits = tf.stack([-threshold_logits, threshold_logits], axis=-1)
+        feature_gates = sparsemoid(threshold_logits)
+        return feature_gates
+
+    def _get_aggregated_response(self, feature_gates):
+        # b: batch, n: number of trees, d: depth of trees, s: 2 (binary channels)
+        # c: 2**depth, u: units (response units)
+        response_gates = tf.einsum('bnds,dcs->bndc', feature_gates, self.binary_lut)
+        response_gates = tf.math.reduce_prod(response_gates, axis=-2)
+        aggregated_response = tf.einsum('bnc,nuc->bnu', response_gates, self.response)
+        return aggregated_response
 
     def call(self, inputs, training=None):
         if not self.initialized:
@@ -111,23 +124,13 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
             self.initialized = True
 
         feature_values = self._get_feature_values(inputs)
-
-        threshold_logits = (feature_values - self.feature_thresholds)
-        threshold_logits = threshold_logits * tf.math.exp(-self.log_temperatures)
-        threshold_logits = tf.stack([-threshold_logits, threshold_logits], axis=-1)
-
-        feature_gates = sparsemoid(threshold_logits)
-
-        # b: batch, n: number of trees, d: depth of trees, s: 2 (binary channels)
-        # c: 2**depth, u: units (response units)
-        response_gates = tf.einsum('bnds,dcs->bndc', feature_gates, self.binary_lut)
-        response_gates = tf.math.reduce_prod(response_gates, axis=-2)
-        response = tf.einsum('bnc,nuc->bnu', response_gates, self.response)
-        response_averaged_over_trees = tf.reduce_mean(response, axis=1)
+        feature_gates = self._get_feature_gates(feature_values)
+        aggregated_response = self._get_aggregated_response(feature_gates)
+        response_averaged_over_trees = tf.reduce_mean(aggregated_response, axis=1)
         return response_averaged_over_trees
 
 
 if __name__=='__main__':
-    layer = ObliviousDecisionTree(n_trees=100, depth=3, units=2)
+    layer = ObliviousDecisionTree(n_trees=5, depth=3, units=2)
     x = tf.random.uniform(shape=(1, 10))
     y = layer(x)

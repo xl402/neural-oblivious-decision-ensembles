@@ -1,9 +1,11 @@
 import tensorflow as tf
 import numpy as np
 import pytest
+from mock import Mock, patch
 
 from node.networks.layer import get_binary_lookup_table, get_feature_selection_logits
-from node.networks.layer import get_log_temperature, get_output_response
+from node.networks.layer import get_log_temperatures, get_output_response
+from node.networks.layer import init_log_temperatures, init_feature_thresholds
 
 TREE_DEPTHS = [1, 2, 3]
 
@@ -42,15 +44,15 @@ def test_get_feature_selection_logits_is_trainable():
     assert out.trainable
 
 
-def test_get_log_temperature_returns_correct_shape():
+def test_get_log_temperatures_returns_correct_shape():
     n_trees, depth = 1, 3
-    out = get_log_temperature(n_trees, depth)
+    out = get_log_temperatures(n_trees, depth)
     assert np.all(out.shape == np.array([n_trees, depth]))
 
 
-def test_get_log_temperature_is_trainable():
+def test_get_log_temperatures_is_trainable():
     n_trees, depth = 1, 3
-    out = get_log_temperature(n_trees, depth)
+    out = get_log_temperatures(n_trees, depth)
     assert out.trainable
 
 
@@ -64,3 +66,19 @@ def test_output_response_is_trainable():
     n_trees, depth, units = 1, 3, 2
     out = get_output_response(n_trees, depth, units)
     assert out.trainable
+
+
+def test_init_log_temperatures_returns_50th_percentile_value():
+    features = np.random.uniform(size=(1, 10))
+    feature_thresholds = np.zeros(features.shape)
+    initial_log_temperature = init_log_temperatures(features, feature_thresholds)
+    assert np.all(initial_log_temperature == np.percentile(features, 50, axis=0))
+
+
+@patch('node.networks.layer.distributions.Beta.sample')
+def test_init_feature_thresholds(percentile_q):
+    n_trees, depth = 1, 3
+    percentile_q.return_value = np.array([.1, .2, .3])
+    features = np.array([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]])
+    out = init_feature_thresholds(features, 1, n_trees, depth).numpy()
+    assert np.all(out.flatten() == [2, 3, 4])
