@@ -101,7 +101,7 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
 
         feature_gates = sparsemoid(threshold_logits)
 
-        # b: batch, n: n_trees, d: depth, s: 2 (binary channels)
+        # b: batch, n: number of trees, d: depth of trees, s: 2 (binary channels)
         # c: 2**depth, u: units (response units)
         response_gates = tf.einsum('bnds,dcs->bndc', feature_gates, self.binary_lut)
         response_gates = tf.math.reduce_prod(response_gates, axis=-2)
@@ -111,6 +111,6 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
 
 
 if __name__=='__main__':
-    layer = ObliviousDecisionTree(n_trees=100, depth=4, units=2)
+    layer = ObliviousDecisionTree(n_trees=100, depth=3, units=2)
     x = tf.random.uniform(shape=(1, 10))
     y = layer(x)
