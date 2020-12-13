@@ -7,6 +7,7 @@ from node.networks.layer import get_binary_lookup_table, get_feature_selection_l
 from node.networks.layer import get_log_temperatures, get_output_response
 from node.networks.layer import init_log_temperatures, init_feature_thresholds
 
+
 TREE_DEPTHS = [1, 2, 3]
 
 
