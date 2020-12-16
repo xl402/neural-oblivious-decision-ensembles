@@ -113,9 +113,9 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
     def _get_aggregated_response(self, feature_gates):
         # b: batch, n: number of trees, d: depth of trees, s: 2 (binary channels)
         # c: 2**depth, u: units (response units)
-        response_gates = tf.einsum('bnds,dcs->bndc', feature_gates, self.binary_lut)
-        response_gates = tf.math.reduce_prod(response_gates, axis=-2)
-        aggregated_response = tf.einsum('bnc,nuc->bnu', response_gates, self.response)
+        aggregated_gates = tf.einsum('bnds,dcs->bndc', feature_gates, self.binary_lut)
+        aggregated_gates = tf.math.reduce_prod(aggregated_gates, axis=-2)
+        aggregated_response = tf.einsum('bnc,nuc->bnu', aggregated_gates, self.response)
         return aggregated_response
 
     def call(self, inputs, training=None):
