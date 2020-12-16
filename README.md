@@ -29,7 +29,6 @@ install `pytest` separately
 Below is an example of a 3 class classifier implemented with 5 layers of
 decision tree ensemble, each of depth 3 with 100 estimators.
 ```python
-from performer.networks.linear_attention import Performer
 from node.networks.model import NODE
 
 
