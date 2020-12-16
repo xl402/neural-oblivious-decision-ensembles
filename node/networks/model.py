@@ -9,20 +9,20 @@ class NODE(tf.keras.Model):
                  n_layers=1,
                  link=tf.identity,
                  n_trees=3,
-                 depth=4,
+                 tree_depth=4,
                  threshold_init_beta=1):
 
         super(NODE, self).__init__()
         self.units = units
         self.n_layers = n_layers
         self.n_trees = n_trees
-        self.depth = depth
+        self.tree_depth = tree_depth
         self.units = units
         self.threshold_init_beta = threshold_init_beta
 
         self.bn = tf.keras.layers.BatchNormalization()
         self.ensemble = [ODT(n_trees=n_trees,
-                             depth=depth,
+                             depth=tree_depth,
                              units=units,
                              threshold_init_beta=threshold_init_beta)
                          for _ in range(n_layers)]
