@@ -33,9 +33,9 @@ import tensorflow as tf
 from node.networks.model import NODE
 
 
-model = NODE(n_trees=100,
-	     n_layers=5,
-	     depth=3,
+model = NODE(n_layers=5,
+	     n_trees=100,
+	     tree_depth=3,
 	     units=3,
 	     link=tf.keras.activations.softmax)
 x = tf.keras.Input(shape=10)
