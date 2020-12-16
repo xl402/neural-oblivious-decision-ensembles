@@ -128,9 +128,3 @@ class ObliviousDecisionTree(tf.keras.layers.Layer):
         aggregated_response = self._get_aggregated_response(feature_gates)
         response_averaged_over_trees = tf.reduce_mean(aggregated_response, axis=1)
         return response_averaged_over_trees
-
-
-if __name__=='__main__':
-    layer = ObliviousDecisionTree(n_trees=5, depth=3, units=2)
-    x = tf.random.uniform(shape=(1, 10))
-    y = layer(x)
