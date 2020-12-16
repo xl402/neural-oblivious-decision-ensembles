@@ -27,7 +27,7 @@ install `pytest` separately
 
 ### Usage
 Below is an example of a binary classifier implemented with 3 layers of
-decision tree ensemble, each of depth 5 with 100 estimators.
+decision trees ensemble, each of depth 5 with 100 estimators.
 
 <img src="https://imgur.com/m4Qr19l.png" width="500px"></img>
 
@@ -36,7 +36,7 @@ import tensorflow as tf
 from node.networks.model import NODE
 
 
-model = NODE(n_layers=5,
+model = NODE(n_layers=3,
 	     n_trees=100,
 	     tree_depth=5,
 	     units=2,
