@@ -34,13 +34,3 @@ class NODE(tf.keras.Model):
             h = tree(x)
             x = tf.concat([x, h], axis=1)
         return self.link(h)
-
-
-if __name__=='__main__':
-    model = NODE(n_trees=5,
-                 n_layers=3,
-                 depth=3,
-                 units=2,
-                 link=tf.keras.activations.softmax)
-    x = tf.random.uniform(shape=(1, 10))
-    y = model(x)
