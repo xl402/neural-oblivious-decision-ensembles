@@ -20,5 +20,5 @@ jobs:
         pip install -r requirements.txt
     - name: Test with pytest
       run: |
-        export PYTHONPATH=/home/runner/work/neural-oblivious-decision-ensembles/node
+        export PYTHONPATH=/home/runner/work/neural-oblivious-decision-ensembles/neural-oblivious-decision-ensembles
         pytest -v
