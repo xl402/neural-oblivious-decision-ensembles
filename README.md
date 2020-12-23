@@ -1,5 +1,5 @@
 # Keras implementation of Neural Oblivious Decision Ensembles
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/xl402/node/node)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/xl402/neural-oblivious-decision-ensembles/node)
 
 
 An implementation of <a href="https://arxiv.org/abs/1909.06312">NODE</a> - the core contribution is a differentiable oblivious decision tree using soft decision boundaries:
