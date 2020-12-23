@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import pytest
-from mock import Mock, patch
+from mock import patch
 
 from node.networks.layer import get_binary_lookup_table, get_feature_selection_logits
 from node.networks.layer import get_log_temperatures, get_output_response
