@@ -14,7 +14,7 @@ Install requirements by running:
 ```
 pip install -r requirements.txt
 ```
-Then export project to python path:
+Then export project and data directories to python path:
 ```
 export PYTHONPATH=$PATH_TO_REPO/node
 export NODE_DATA_DIR=$PATH_TO_REPO/node/experiments/data
@@ -23,7 +23,7 @@ There is around 1GB of data to be downloaded.
 
 ## 2. Experiments
 
-### 3. Fraud Detection
+### 2.1 Fraud Detection
 First run `preprocessing.py`, which creates the following files:
 * `train_base.csv` and `test_base.csv` - datasets with base features only
 * `train_features.csv` and `test_features.csv`. 
