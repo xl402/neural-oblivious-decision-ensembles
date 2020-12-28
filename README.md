@@ -24,10 +24,6 @@ There is around 1GB of data to be downloaded.
 ## 2. Experiments
 
 ### 2.1 Fraud Detection
-First run `preprocessing.py`, which creates the following files:
-* `train_base.csv` and `test_base.csv` - datasets with base features only
-* `train_features.csv` and `test_features.csv`. 
-
 Note that this script very naively imputes all null values with `-1` (which is set as the default `null` value for the Xgboost algorithm), and this may account for some of the weaker performance with the neural network models.
 
 Then use `xgboost_experiment.py`, `mlp_experiment.py`, `node_experiment.py`, `tabnet_experiment.py` respectively to train and evaluate models on either dataset (uncommenting the code appropriately to choose between `base` and `features` datasets).
