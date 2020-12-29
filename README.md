@@ -38,8 +38,6 @@ The following tables summarise the performance metrics obtained for each model.
 |---------|-----------|----------|
 | Xgboost           | 0.934| 0.840|
 | NODE (1, 100, 6)  | 0.839| 0.803|
-| NODE (1, 10, 6)   | 0.828| 0.793|
-| NODE (2, 10, 6)   | 0.850| 0.801|
 | NODE (4, 10, 6)   | 0.830| 0.803|
 | MLP (50, 50)      | 0.726| 0.735|
 | MLP (100, 100)    | 0.718| 0.745|
