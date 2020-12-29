@@ -46,16 +46,16 @@ The following tables summarise the performance metrics obtained for each model.
 
 **With Feature Engineering**
 
-| Model   | Feature Set | Train AUC | Test AUC |
-|---------|-------------|-----------|----------|
-| Xgboost | Engineered  | 0.962| 0.898|
-| NODE (1, 100, 6)   | Engineered  | 0.893| 0.843|
-| NODE (4, 10, 6) | Engineered | 0.886| 0.836|
-| MLP (50, 50) | Engineered   | 0.777| 0.796|
-| MLP (100, 100) | Engineered   | 0.775| 0.783|
-| TabNet (32, 8, 1) | Engineered | 0.878| 0.837|
-| TabNet (64, 8, 1) | Engineered | 0.861| 0.840|
-| TabNet (128, 8, 1) | Engineered | 0.842| 0.834|
+| Model   | Train AUC | Test AUC |
+|---------|-----------|----------|
+| Xgboost            | 0.962| 0.898|
+| NODE (1, 100, 6)   | 0.893| 0.843|
+| NODE (4, 10, 6)    | 0.886| 0.836|
+| MLP (50, 50)       | 0.777| 0.796|
+| MLP (100, 100)     | 0.775| 0.783|
+| TabNet (32, 8, 1)  | 0.878| 0.837|
+| TabNet (64, 8, 1)  | 0.861| 0.840|
+| TabNet (128, 8, 1) | 0.842| 0.834|
 
 * NODE (n_layers, n_trees, depth)
 * MLP (dense_dim_1, dense_dim_2,..., dense_dim_n)
