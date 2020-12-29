@@ -31,18 +31,18 @@ Then use `xgboost_experiment.py`, `mlp_experiment.py`, `node_experiment.py`, `ta
 The following tables summarise the performance metrics obtained for each model.
 
 **No Feature Engineering**
-| Model   | Feature Set | Train AUC | Test AUC |
-|---------|-------------|-----------|----------|
-| Xgboost | Base        | 0.934| 0.840|
-| NODE (1, 100, 6)    | Base        | 0.839| 0.803|
-| NODE (1, 10, 6) | Base   | 0.828| 0.793|
-| NODE (2, 10, 6) | Base   | 0.850| 0.801|
-| NODE (4, 10, 6) | Base   | 0.830| 0.803|
-| MLP (50, 50) | Base   | 0.726| 0.735|
-| MLP (100, 100) | Base   | 0.718| 0.745|
-| TabNet (32, 8, 1) | Base | 0.772| 0.760|
-| TabNet (64, 8, 1) | Base | 0.796| 0.767|
-| TabNet (128, 8, 1) | Base | 0.796| 0.764|
+| Model   | Train AUC | Test AUC |
+|---------|-----------|----------|
+| Xgboost           | 0.934| 0.840|
+| NODE (1, 100, 6)  | 0.839| 0.803|
+| NODE (1, 10, 6)   | 0.828| 0.793|
+| NODE (2, 10, 6)   | 0.850| 0.801|
+| NODE (4, 10, 6)   | 0.830| 0.803|
+| MLP (50, 50)      | 0.726| 0.735|
+| MLP (100, 100)    | 0.718| 0.745|
+| TabNet (32, 8, 1) | 0.772| 0.760|
+| TabNet (64, 8, 1) | 0.796| 0.767|
+| TabNet (128, 8, 1)| 0.796| 0.764|
 
 **With Feature Engineering**
 
