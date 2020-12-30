@@ -9,7 +9,7 @@ models such as *lightgbm*, *xgboost* and another DL based tabular architecture
 claims.
 
 
-## 1. Initial Setup
+### Initial Setup
 Install requirements by running:
 ```
 pip install -r requirements.txt
@@ -73,5 +73,3 @@ The expectation was that the neural nets would perform (relatively) better with 
 We use the dataset from Kaggle's [Store Item Demand Forecasting Challenge
 ](https://www.kaggle.com/c/demand-forecasting-kernels-only/data)
 with feature engineering primarily based on [this public notebook](https://www.kaggle.com/abhilashawasthi/feature-engineering-lgb-model)
-
-NODE's performance is compared with lightgbm:
