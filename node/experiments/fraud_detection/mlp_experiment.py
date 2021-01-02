@@ -19,4 +19,4 @@ def build_mlp():
 if __name__ == "__main__":
     # train_file, test_file = 'train_base.csv', 'test_base.csv'
     train_file, test_file = 'train_features.csv', 'test_features.csv'
-    run_keras_experiment(train_file, test_file, build_mlp, patience=8)
+    run_keras_experiment(train_file, test_file, build_mlp, patience=20)
