@@ -44,7 +44,7 @@ The following tables summarise the performance metrics (AUC, higher the better) 
 | Model   | Test AUC |
 |---------|----------|
 | Xgboost            | 0.898|
-| NODE (4, 10, 6)    | 0.836|
+| NODE (4, 10, 6)    | 0.846|
 | MLP (100, 100)     | 0.843|
 | TabNet (128, 8, 1) | 0.834|
 
