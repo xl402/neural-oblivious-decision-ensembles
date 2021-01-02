@@ -33,29 +33,21 @@ The following tables summarise the performance metrics obtained for each model.
 <tr><th>Raw Data </th><th>With Feature Engineering</th></tr>
 <tr><td>
 
-| Model   | Train AUC | Test AUC |
-|---------|-----------|----------|
-| Xgboost           | 0.934| 0.840|
-| NODE (1, 100, 6)  | 0.839| 0.803|
-| NODE (4, 10, 6)   | 0.830| 0.803|
-| MLP (50, 50)      | 0.726| 0.735|
-| MLP (100, 100)    | 0.718| 0.745|
-| TabNet (32, 8, 1) | 0.772| 0.760|
-| TabNet (64, 8, 1) | 0.796| 0.767|
-| TabNet (128, 8, 1)| 0.796| 0.764|
+| Model   | Test AUC |
+|---------|----------|
+| Xgboost           | 0.840|
+| NODE (1, 100, 6)  | 0.803|
+| MLP (50, 50)      | 0.735|
+| TabNet (32, 8, 1) | 0.760|
 
 </td><td>
 
-| Model   | Train AUC | Test AUC |
-|---------|-----------|----------|
-| Xgboost            | 0.962| 0.898|
-| NODE (1, 100, 6)   | 0.893| 0.843|
-| NODE (4, 10, 6)    | 0.886| 0.836|
-| MLP (50, 50)       | 0.777| 0.796|
-| MLP (100, 100)     | 0.775| 0.783|
-| TabNet (32, 8, 1)  | 0.878| 0.837|
-| TabNet (64, 8, 1)  | 0.861| 0.840|
-| TabNet (128, 8, 1) | 0.842| 0.834|
+| Model   | Test AUC |
+|---------|----------|
+| Xgboost            | 0.898|
+| NODE (4, 10, 6)    | 0.836|
+| MLP (100, 100)     | 0.783|
+| TabNet (128, 8, 1) | 0.834|
 
 
 </td></tr> </table>
@@ -73,3 +65,17 @@ The expectation was that the neural nets would perform (relatively) better with 
 We use the dataset from Kaggle's [Store Item Demand Forecasting Challenge
 ](https://www.kaggle.com/c/demand-forecasting-kernels-only/data)
 with feature engineering primarily based on [this public notebook](https://www.kaggle.com/abhilashawasthi/feature-engineering-lgb-model)
+
+It is useless to experiment with raw without feature-engineering data since due
+to the complete lack of raw feature columns (i.e. target column sales is one of
+the three columns). All parameters are hand-tuned no more than 10 times.
+
+| Model   | Test SMAPE |
+|---------|----------|
+| Xgboost            | 12.55|
+| NODE (5, 20, 5)    | 12.64|
+| MLP (100, 100)     | 15.57|
+| TabNet (81, 20, 1) | 13.37|
+
+Again, we see NODE comes closest to Lightgbm but does not beat it
+out-of-the-box.
