@@ -71,11 +71,9 @@ Table below summarizes the result (with SMAPE as a metric, lower the better).
 |---------|----------|
 | LightGBM           | 12.55|
 | NODE (5, 20, 5)    | 12.64|
-| MLP (100, 100)     | 15.57|
-| TabNet (81, 20, 1) | 13.37|
+| MLP (100, 100)     | 13.20|
+| TabNet (81, 20, 1) | 12.92|
 
 
-## 3. Conclusions
+## 3. Conclusion
 Tree based models remains very competitive. In both experiments, classic tree-based models out-perform DL based models.
-NODE seems to do slightly better than TabNet, both significantly outperform MLP
-as expected.
