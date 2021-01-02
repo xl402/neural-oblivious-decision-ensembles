@@ -45,7 +45,7 @@ The following tables summarise the performance metrics (AUC, higher the better) 
 |---------|----------|
 | Xgboost            | 0.898|
 | NODE (4, 10, 6)    | 0.836|
-| MLP (100, 100)     | 0.783|
+| MLP (100, 100)     | 0.843|
 | TabNet (128, 8, 1) | 0.834|
 
 
@@ -75,7 +75,5 @@ Table below summarizes the result (with SMAPE as a metric, lower the better).
 | TabNet (81, 20, 1) | 13.37|
 
 
-## 3. Conclusions
+## 3. Conclusion
 Tree based models remains very competitive. In both experiments, classic tree-based models out-perform DL based models.
-NODE seems to do slightly better than TabNet, and both outperform MLP
-as expected.
