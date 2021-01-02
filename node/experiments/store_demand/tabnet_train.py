@@ -82,5 +82,3 @@ if __name__ == '__main__':
                         epochs=500,
                         validation_data=(x_val, y_val),
                         callbacks=[es_callback])
-
-    np.save('results/tabnet_y_val_pred', np.expm1(model.predict(x_val)[:, 0]))

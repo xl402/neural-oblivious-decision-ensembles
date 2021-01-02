@@ -94,5 +94,3 @@ if __name__ == '__main__':
                                    x_val.loc[:, cols].values,
                                    y_val,
                                    verbose_eval=500)
-
-    np.save('results/lgb_y_val_pred', val_df.pred_Y_val.to_numpy())
