@@ -53,17 +53,17 @@ if __name__ == '__main__':
 
     inputs = tf.keras.Input(shape=(len(cols),))
     node = NODE(units=1,
-                n_layers=5,
-                n_trees=20,
+                n_layers=3,
+                n_trees=10,
                 binary_selector=sparsemoid,
-                tree_depth=5,
+                tree_depth=4,
                 link=tf.keras.activations.relu)
     outputs = node(inputs)
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
     es_callback = EarlyStopping(monitor='val_loss',
                                 mode='min',
-                                patience=5,
+                                patience=50,
                                 restore_best_weights=True)
 
     model.compile(optimizer='adam',

@@ -41,7 +41,10 @@ def run_keras_experiment(
         epochs=100,
         batch_size=128,
         patience=5,
-        args={}):
+        args=None):
+
+    if args is None:
+        args = {}
 
     x_train, y_train, feature_names = load_data(train_data)
     x_test, y_test, _ = load_data(test_data)
