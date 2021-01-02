@@ -27,7 +27,7 @@ There is around 1GB of data to be downloaded.
 Note that this script imputes all null values with `-1` for DL-based models which may account for some of the weaker performances recorded.
 Use `xgboost_experiment.py`, `mlp_experiment.py`, `node_experiment.py`, `tabnet_experiment.py` respectively to train and evaluate models on either dataset (uncommenting the code appropriately to choose between `base` and `features` datasets).
 
-The following tables summarise the performance metrics obtained for each model.
+The following tables summarise the performance metrics (AUC, higher the better) obtained for each model.
 
 <table>
 <tr><th>Raw Data </th><th>With Feature Engineering</th></tr>
@@ -56,26 +56,27 @@ The following tables summarise the performance metrics obtained for each model.
 * MLP (dense_dim_1, dense_dim_2,..., dense_dim_n)
 * TabNet (feature_dim, output_dim, num_decision_steps)
 
-**Conclusion**:
-
-Tree based models still set a very strong baseline for classifying fraud, both with only base features and engineered features.
-The expectation was that the neural nets would perform (relatively) better with base features only, by learning their own features. Further measures could have been taken to improve neural net performance e.g. downsampling genuines and handling missing values more appropriately. NODE seems to do better than TabNet on base features only, suggesting it is better at generating complex features, but with engineered features, TabNet performs just as well. Both NODE and TabNet significantly outperform simple MLPs (with minimal tuning), but underperform XGBoost using the same basic preprocessing. 
 
 ### 2.2 Store Demand Forecasting
 We use the dataset from Kaggle's [Store Item Demand Forecasting Challenge
 ](https://www.kaggle.com/c/demand-forecasting-kernels-only/data)
-with feature engineering primarily based on [this public notebook](https://www.kaggle.com/abhilashawasthi/feature-engineering-lgb-model)
+with feature engineering primarily based on [this public notebook](https://www.kaggle.com/abhilashawasthi/feature-engineering-lgb-model).
 
 It is useless to experiment with raw without feature-engineering data since due
 to the complete lack of raw feature columns (i.e. target column sales is one of
 the three columns). All parameters are hand-tuned no more than 10 times.
 
+Table below summarizes the result (with SMAPE as a metric, lower the better).
+
 | Model   | Test SMAPE |
 |---------|----------|
-| Xgboost            | 12.55|
+| LightGBM           | 12.55|
 | NODE (5, 20, 5)    | 12.64|
 | MLP (100, 100)     | 15.57|
 | TabNet (81, 20, 1) | 13.37|
 
-Again, we see NODE comes closest to Lightgbm but does not beat it
-out-of-the-box.
+
+## 3. Conclusions
+Tree based models remains very competitive. In both experiments, classic tree-based models out-perform DL based models.
+NODE seems to do slightly better than TabNet, both significantly outperform MLP
+as expected.
