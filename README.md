@@ -4,7 +4,7 @@
 The original paper does not
 compare `NODE` on feature-engineered data (which is essential for making best
 performing models). In this branch, we compare NODE against modern tree-based
-models such as *lightgbm*, *xgboost* and another DL based tabular architecture
+models such as *LightGBM*, *Xgboost* and another DL based tabular architecture
 *TabNet*.
 
 
