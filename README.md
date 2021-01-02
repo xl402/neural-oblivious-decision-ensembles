@@ -77,5 +77,5 @@ Table below summarizes the result (with SMAPE as a metric, lower the better).
 
 ## 3. Conclusions
 Tree based models remains very competitive. In both experiments, classic tree-based models out-perform DL based models.
-NODE seems to do slightly better than TabNet, both significantly outperform MLP
+NODE seems to do slightly better than TabNet, and both outperform MLP
 as expected.
