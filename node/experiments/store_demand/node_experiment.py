@@ -2,8 +2,6 @@ from tensorflow.keras.callbacks import EarlyStopping
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
-from keras_adabound import AdaBound
-
 
 from node.experiments.store_demand.features import add_features
 from node.experiments.store_demand.features import add_fold_label
@@ -68,7 +66,7 @@ if __name__ == '__main__':
                                 patience=5,
                                 restore_best_weights=True)
 
-    model.compile(optimizer=AdaBound(lr=1e-3, final_lr=0.1),
+    model.compile(optimizer='adam',
                   loss='mae',
                   metrics=[smape])
 

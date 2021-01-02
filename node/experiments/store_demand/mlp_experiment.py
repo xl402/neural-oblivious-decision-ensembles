@@ -56,13 +56,13 @@ if __name__ == '__main__':
         [
             Dense(100, activation="relu"),
             Dense(100, activation="relu"),
-            Dense(1, activation="sigmoid")
+            Dense(1, activation="relu")
         ]
     )
 
     es_callback = EarlyStopping(monitor='val_loss',
                                 mode='min',
-                                patience=10,
+                                patience=50,
                                 restore_best_weights=True)
 
     model.compile(optimizer='adam',
