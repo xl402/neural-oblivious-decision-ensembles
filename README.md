@@ -1,12 +1,11 @@
 # NODE Experiments
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/xl402/neural-oblivious-decision-ensembles/node)
 
-Things in research tend to be too good to be true, the original paper does not
+The original paper does not
 compare `NODE` on feature-engineered data (which is essential for making best
 performing models). In this branch, we compare NODE against modern tree-based
 models such as *lightgbm*, *xgboost* and another DL based tabular architecture
-*TabNet*. The aim is to validate the performance of NODE to be true to authors'
-claims.
+*TabNet*.
 
 
 ### Initial Setup
@@ -24,8 +23,8 @@ There is around 1GB of data to be downloaded.
 ## 2. Experiments
 
 ### 2.1 Fraud Detection
-Note that this script imputes all null values with `-1` for DL-based models which may account for some of the weaker performances recorded.
-Use `xgboost_experiment.py`, `mlp_experiment.py`, `node_experiment.py`, `tabnet_experiment.py` respectively to train and evaluate models on either dataset (uncommenting the code appropriately to choose between `base` and `features` datasets).
+We use the dataset from Kaggle's [IEEE-CIS Fraud Detection](https://www.kaggle.com/c/ieee-fraud-detection/data)
+with feature engineering primarily based on [this public notebook](https://www.kaggle.com/abhilashawasthi/feature-engineering-lgb-model).
 
 The following tables summarise the performance metrics (AUC, higher the better) obtained for each model.
 
