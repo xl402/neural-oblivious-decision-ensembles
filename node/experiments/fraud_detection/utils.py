@@ -38,9 +38,9 @@ def run_keras_experiment(
         test_data,
         build_model,
         val_ratio=0.2,
-        epochs=100,
+        epochs=500,
         batch_size=128,
-        patience=5,
+        patience=20,
         args=None):
 
     if args is None:
