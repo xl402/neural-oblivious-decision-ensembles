@@ -3,3 +3,4 @@
 - 2. node not tuned: 12.753
 - 3. node with extra feature dense layer: 12.637
 - 4. node (3) + lgb (1) ensemble weights .3 vs .7: 12.476
+- 5. TabNet not tuned: 13.368
